@@ -12,14 +12,14 @@ async function run(){
     // console.log('Result is: ', result.rows); 
 
     const response = await axios.get('https://randomuser.me/api/?results=50');  
-    console.log(response.data.results);  
-    const cpId = 2; 
-    const middleName = 'SHA'; 
+    console.log(response.data.results);   
     const CEO_Of_Company= ""; 
     let c; 
     for(const person of response.data.results)
     {
-        c= Math.floor(Math.random()%3); 
+        c= Math.floor(Math.random()*3); 
+        let temp_cpID  = Math.floor(Math.random()*22) + 1;
+        const cpID = temp_cpID;    
         const userID = person.login.uuid; 
         const firstName = person.name.first; 
         const lastName = person.name.last;
@@ -34,7 +34,7 @@ async function run(){
         if(c == 1) type = "Seeker";
         else if(c == 0) type = "Employer";   
         await connection.commit() ;
-        await connection.execute(`INSERT INTO "User" VALUES('${userID}','${firstName}','${lastName}', '${City}','${Postal}','${state}', '${Country}','${Age}','${gender}','${phone}','${cpId}','${CEO_Of_Company}','${type}')`); 
+        await connection.execute(`INSERT INTO "User" VALUES('${userID}','${firstName}','${lastName}', '${City}','${Postal}','${state}', '${Country}','${Age}','${gender}','${phone}','${cpID}','${CEO_Of_Company}','${type}')`); 
     };
 
     // const res = await connection.execute(
