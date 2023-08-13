@@ -9,12 +9,15 @@ async function run(){
     }); 
     // let companyname = 'Google' ;  
     // const result = await connection.execute(`SELECT * FROM "Company" WHERE "Name" = '${companyname}'`); 
+    
     // console.log('Result is: ', result.rows); 
 
     const response = await axios.get('https://randomuser.me/api/?results=50');  
-    console.log(response.data.results);   
+    ///For data population.
+    // console.log(response.data.results);   
     const CEO_Of_Company= ""; 
     let c; 
+    let hobbies =["Reading manga","Football", "Books", "Gardening", "Cricket", "Table Tennis", "Long Tennis", "Organize", "Sleep", "Driving", "Cooking", "Games", "Streaming", "Eating", "Solitare", "Uno"]; 
     for(const person of response.data.results)
     {
         c= Math.floor(Math.random()*3); 
@@ -36,19 +39,26 @@ async function run(){
         await connection.execute(
         `INSERT INTO "User" 
         VALUES('${userID}','${firstName}','${lastName}','${City}','${Postal}','${state}','${Country}','${Age}','${gender}','${phone}','${cpID}','${CEO_Of_Company}','${type}')`);
-        if(!c)
+        if(c == 0)
         {
             await connection.execute(`INSERT INTO "Employer" VALUES('${cpID}','${userID}')`); 
         } 
+        else if(c == 1)
+        {
+            let idx = Math.floor(Math.random()*hobbies.length); 
+            await connection.execute(`INSERT INTO "Job seeker" VALUES('${userID}')`);
+            await connection.execute(`INSERT INTO "Hobbies" VALUES('${userID}','${hobbies[idx]}')`);  
+        }
     }
     await connection.commit() ;
 
-    // const res = await connection.execute(
-    //     `SELECT * FROM "User"`
-    // ); 
-    // console.log(res.rows) ; 
+    const res = await connection.execute(
+        `SELECT * FROM "User"`
+    ); 
+    console.log(res.rows) ; 
 
     await connection.close() ; //Always close connections.
 }
 
 run() ; 
+
