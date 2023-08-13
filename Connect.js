@@ -32,10 +32,16 @@ async function run(){
         const phone = person.phone; 
         type =""; 
         if(c == 1) type = "Seeker";
-        else if(c == 0) type = "Employer";   
-        await connection.commit() ;
-        await connection.execute(`INSERT INTO "User" VALUES('${userID}','${firstName}','${lastName}', '${City}','${Postal}','${state}', '${Country}','${Age}','${gender}','${phone}','${cpID}','${CEO_Of_Company}','${type}')`); 
-    };
+        else if(c == 0) type = "Employer"; 
+        await connection.execute(
+        `INSERT INTO "User" 
+        VALUES('${userID}','${firstName}','${lastName}','${City}','${Postal}','${state}','${Country}','${Age}','${gender}','${phone}','${cpID}','${CEO_Of_Company}','${type}')`);
+        if(!c)
+        {
+            await connection.execute(`INSERT INTO "Employer" VALUES('${cpID}','${userID}')`); 
+        } 
+    }
+    await connection.commit() ;
 
     // const res = await connection.execute(
     //     `SELECT * FROM "User"`
