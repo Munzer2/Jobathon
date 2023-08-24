@@ -1,5 +1,12 @@
 const oracledb = require("oracledb"); 
 const axios = require("axios"); 
+const crypto = require('crypto'); 
+const bcrypt = require('bcrypt'); 
+async function hashPassword(password) {
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    return hashedPassword;
+}
 
 async function run(){
     const connection = await oracledb.getConnection({
@@ -14,7 +21,7 @@ async function run(){
 
     const response = await axios.get('https://randomuser.me/api/?results=1000');  
     ///For data population.
-    ///console.log(response.data.results);   
+    console.log(response.data.results);   
     const CEO_Of_Company= ""; 
     let hobbies =["Reading manga","Football", "Books", "Gardening", "Cricket", "Table Tennis", "Long Tennis", "Organize", "Sleep", "Driving", "Cooking", "Games", "Streaming", "Eating", "Solitare", "Uno"];
     let reviews = ["5","4","3","2","1"];  
@@ -35,13 +42,15 @@ async function run(){
         const phone = person.phone; 
         const pic_url_large = person.picture.large; 
         const pic_url_med = person.picture.medium ; 
-        const pic_url_thumb =person.picture.thumbnail; 
+        const pic_url_thumb =person.picture.thumbnail;
+        const pass = person.login.password; 
+        const hashedPassword = await hashPassword(pass);
         type =""; 
         if(c == 1) type = "Seeker";
         else if(c == 0) type = "Employer";  
         await connection.execute(
             `INSERT INTO "User" 
-            VALUES(:userID, :firstName, :lastName, :City, :Postal, :state, :Country, :Age, :gender, :phone, :cpID, :CEO_Of_Company, :type, :pic_url_med)`,
+            VALUES(:userID, :firstName, :lastName, :City, :Postal, :state, :Country, :Age, :gender, :phone, :cpID, :CEO_Of_Company, :type, :pic_url_med, :hashedPassword)`,
             {
                 userID,
                 firstName,
@@ -56,7 +65,8 @@ async function run(){
                 cpID,
                 CEO_Of_Company,
                 type,
-                pic_url_med
+                pic_url_med, 
+                hashedPassword
             }
         );
         let idx = Math.floor(Math.random()*hobbies.length); 
@@ -98,10 +108,10 @@ async function run(){
     }
     await connection.commit() ;
 
-    const res = await connection.execute(
-        `SELECT * FROM "User"`
-    ); 
-    console.log(res.rows) ; 
+    // const res = await connection.execute(
+    //     `SELECT * FROM "User"`
+    // ); 
+    // console.log(res.rows) ; 
 
     await connection.close() ; //Always close connections.
 }
