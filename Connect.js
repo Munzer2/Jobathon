@@ -12,7 +12,7 @@ async function run(){
     
     // console.log('Result is: ', result.rows); 
 
-    const response = await axios.get('https://randomuser.me/api/?results=50');  
+    const response = await axios.get('https://randomuser.me/api/?results=1000');  
     ///For data population.
     ///console.log(response.data.results);   
     const CEO_Of_Company= ""; 
@@ -40,8 +40,25 @@ async function run(){
         if(c == 1) type = "Seeker";
         else if(c == 0) type = "Employer";  
         await connection.execute(
-        `INSERT INTO "User" 
-        VALUES('${userID}','${firstName}','${lastName}','${City}','${Postal}','${state}','${Country}','${Age}','${gender}','${phone}','${cpID}','${CEO_Of_Company}','${type}','${pic_url_med}')`);
+            `INSERT INTO "User" 
+            VALUES(:userID, :firstName, :lastName, :City, :Postal, :state, :Country, :Age, :gender, :phone, :cpID, :CEO_Of_Company, :type, :pic_url_med)`,
+            {
+                userID,
+                firstName,
+                lastName,
+                City,
+                Postal,
+                state,
+                Country,
+                Age,
+                gender,
+                phone,
+                cpID,
+                CEO_Of_Company,
+                type,
+                pic_url_med
+            }
+        );
         let idx = Math.floor(Math.random()*hobbies.length); 
         await connection.execute(`INSERT INTO "Hobbies" VALUES('${userID}','${hobbies[idx]}')`);
         if(c == 0)///Employer
