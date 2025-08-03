@@ -32,6 +32,50 @@ router.post('/login', async ( req, res ) => {
 }); 
 
 
+router.post('/register', async (req,res) => {
+    try {
+        const { firstName, lastName, email, password, city, state, country, age, gender, phone , type } = req.body;
+
+        const existing = await User.findOne({email}); 
+        if(existing) {
+            return res.status(400).json({ success: false, message: 'User already exists'});
+        }
+
+        const newUser = new User({
+            firstName,
+            lastName,
+            email,  
+            password,
+            city,
+            state,
+            country,
+            age,
+            gender, 
+            phone,
+            type,
+            hobbies: []
+        }); 
+
+        await newUser.save();
+
+        res.status(201).json({
+            success: true, 
+            message: 'User registered successfully',
+            user: {
+                id: newUser._id,
+                firstName: newUser.firstName,
+                lastName: newUser.lastName,
+                email: newUser.email,
+                type: newUser.type
+            }
+        }); 
+    }
+    catch(error) {
+        res.status(500).json({ success: false, message: 'Server error'});
+    }
+}); 
+
+
 
 router.get('/profile/:userId', async (req, res) => {
     try { 
