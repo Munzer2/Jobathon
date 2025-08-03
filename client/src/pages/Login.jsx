@@ -31,8 +31,8 @@ const LoginPage = () => {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
         
-        // Redirect to profile
-        navigate(`/profile/${response.data.user.id}`);
+        // Redirect to dashboard
+        navigate('/dashboard');
       }
     } catch (error) {
       setError(error.response?.data?.message || 'Login failed. Please try again.');

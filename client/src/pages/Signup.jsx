@@ -56,7 +56,7 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-12 px-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-12 px-6"> 
       <div className="max-w-2xl mx-auto">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -239,7 +239,7 @@ const SignupPage = () => {
               </div>
             </div>
 
-            {/* Additional Info */}
+            {/* Age, gender, phone */}
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <label htmlFor="age" className="block text-sm font-medium text-gray-300 mb-2">
@@ -271,7 +271,6 @@ const SignupPage = () => {
                   <option value="">Select</option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
-                  <option value="other">Other</option>
                 </select>
               </div>
               <div>
