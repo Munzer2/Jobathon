@@ -72,8 +72,10 @@ app.get('/api/test' , async (req, res) => {
 
 
 const authRoutes = require('./Routes/auth');
+const jobRoutes = require('./Routes/jobs');
 
 app.use('/api/auth', authRoutes);
+app.use('/api/jobs', jobRoutes); 
 
 // Error handling middleware
 app.use((err, req, res, next) => {

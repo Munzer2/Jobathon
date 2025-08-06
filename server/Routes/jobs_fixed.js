@@ -1,12 +1,12 @@
 const express = require('express');
-const Job = require('../Models/jobModel'); // Fixed: Jobs -> Job
+const Job = require('../Models/jobModel');
 const User = require('../Models/dbModel'); 
 const router = express.Router();
 
 // Get all jobs with filtering and search
 router.get('/', async (req, res) => {
     try {
-        const { search, location, type, category, page = 1, limit } = req.query;
+        const { search, location, type, category, page = 1, limit = 10 } = req.query;
         
         let query = { isActive: true };
         
@@ -20,35 +20,23 @@ router.get('/', async (req, res) => {
         if (type) query.type = type;
         if (category) query.category = category;
         
-        let jobsQuery = Job.find(query)
+        const jobs = await Job.find(query)
             .populate('employerId', 'firstName lastName company')
-            .sort({ postedAt: -1 });
+            .sort({ postedAt: -1 })
+            .limit(limit * 1)
+            .skip((page - 1) * limit);
             
-        // Only apply pagination if limit is specified
-        if (limit) {
-            jobsQuery = jobsQuery
-                .limit(limit * 1)
-                .skip((page - 1) * limit);
-        }
-        
-        const jobs = await jobsQuery;
         const total = await Job.countDocuments(query);
         
-        // Return pagination info only if limit was specified
-        const response = {
+        res.json({
             success: true,
-            data: jobs
-        };
-        
-        if (limit) {
-            response.pagination = {
+            data: jobs,
+            pagination: {
                 current: page,
                 total: Math.ceil(total / limit),
                 hasNext: page < Math.ceil(total / limit)
-            };
-        }
-        
-        res.json(response);
+            }
+        });
     } catch (error) {
         console.error('Error fetching jobs:', error);
         res.status(500).json({ success: false, message: 'Server error' });
@@ -58,7 +46,7 @@ router.get('/', async (req, res) => {
 // Get single job by ID
 router.get('/:id', async(req,res) => {
     try { 
-        const job = await Job.findById(req.params.id) // Fixed: Jobs -> Job
+        const job = await Job.findById(req.params.id)
             .populate('employerId', 'firstName lastName email phone company')
             .populate('applications.applicantId', 'firstName lastName email');
 
@@ -78,15 +66,13 @@ router.get('/:id', async(req,res) => {
             message: 'Server error' 
         }); 
     }
-}); 
+});
 
-/// Create a new job
+// Create a new job
 router.post('/create', async (req, res) => {
     try{
         const { title, company, description, requirements, location, type, salary,
-            experience, category, skills, benefits, deadline } = req.body;
-            
-        const { employerId } = req.body; 
+            experience, category, skills, benefits, deadline, employerId } = req.body;
 
         const newJob = new Job({
             title, company, description, requirements, location, type, salary,
@@ -95,74 +81,72 @@ router.post('/create', async (req, res) => {
 
         await newJob.save(); 
 
-        const PopulatedJob = await Job.findById(newJob._id)
-        .populate('employerId', 'firstName lastName company'); 
+        const populatedJob = await Job.findById(newJob._id)
+            .populate('employerId', 'firstName lastName company'); 
 
         res.status(201).json({
             success: true,
-            data: PopulatedJob
-        }); 
-    }
-    catch(error) { 
-        console.error('Error creating a job: ' ,error);
+            data: populatedJob
+        });
+    } catch(error) {
+        console.error('Error creating job:', error);
         res.status(500).json({
             success: false,
-            message: 'Server error' 
+            message: 'Server error'
         });
     }
-}); 
+});
 
-
-router.post('/:id/apply', async(req, res) => { 
+// Apply to a job
+router.post('/:id/apply', async (req, res) => {
     try {
-        const { applicantId, coverLetter } = req.body; 
-        const JobId = req.params.id; 
+        const { applicantId, coverLetter } = req.body;
+        const job = await Job.findById(req.params.id);
 
-        const job = await Job.findById(JobId); 
-        if(!job) {
+        if (!job) {
             return res.status(404).json({
                 success: false,
-                message: 'Job not found' 
-            }); 
+                message: 'Job not found'
+            });
         }
 
+        // Check if already applied
         const existingApp = job.applications.find(
-            app => app.applicantId.toString() == applicantId 
+            app => app.applicantId.toString() === applicantId
         );
 
-
-        if(existingApp) { 
+        if (existingApp) {
             return res.status(400).json({
-                success: false, message: 'Already applied to this job' 
-            }); 
+                success: false,
+                message: 'Already applied to this job'
+            });
         }
 
-        /// add the application
-
+        // Add application
         job.applications.push({
-            applicantId, 
-            coverLetter, 
-            appliedAt : new Date() 
-        }); 
+            applicantId,
+            coverLetter,
+            appliedAt: new Date()
+        });
 
         await job.save();
 
         res.json({
-            success: true, message: 'Application submitted successfully'
-        }); 
-    }
-    catch(error) { 
+            success: true,
+            message: 'Application submitted successfully'
+        });
+    } catch (error) {
         console.error('Error applying to job:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 
-
+// Get jobs for specific employer
 router.get('/employer/:employerId', async(req,res) => {
     try {
         const jobs = await Job.find({ employerId : req.params.employerId })
             .populate('applications.applicantId', 'firstName lastName email')
-            .sort({ postedAt: -1}); /// sort by most recent first
+            .sort({ postedAt: -1});
 
         res.json({
             success: true, 
@@ -175,23 +159,21 @@ router.get('/employer/:employerId', async(req,res) => {
     }
 });
 
-
-
+// Get job statistics
 router.get('/stats', async(req,res)=> {
     try {
+        const totalJobs = await Job.countDocuments({ isActive: true });
 
-        const totalJobs = await Job.countDocuments({ isActive: true }); /// Count total active jobs
-
-        const cat = await Job.aggregate([
-            { $match : { isActive : true }}, /// filter actiive jobs
-            { $group : { _id: '$category', count: { $sum: 1 } } }, // group by category
-            { $sort: { count: -1 } } // sort by count descending
+        const categories = await Job.aggregate([
+            { $match : { isActive : true }},
+            { $group : { _id: '$category', count: { $sum: 1 } } },
+            { $sort: { count: -1 } }
         ]);  
 
         const totalApplications = await Job.aggregate([
             { $match : { isActive : true }},
-            { $project: { applicationCount : { $size: '$applications'}}}, /// get application count. WHat project does is it creates a new field applicationCount which is the size of the applications array
-            { $group : { _id : null, total: { $sum: 'applicationCount'}}} /// total applications
+            { $project: { applicationCount : { $size: '$applications'}}},
+            { $group : { _id : null, total: { $sum: '$applicationCount'}}}
         ]); 
 
         const types = await Job.aggregate([
@@ -205,7 +187,7 @@ router.get('/stats', async(req,res)=> {
             data: {
                 totalJobs,
                 totalApplications: totalApplications[0]?.total || 0, 
-                cat,
+                categories,
                 types
             }
         }); 
@@ -215,6 +197,5 @@ router.get('/stats', async(req,res)=> {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 }); 
-
 
 module.exports = router;
