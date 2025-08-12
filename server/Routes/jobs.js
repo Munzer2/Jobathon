@@ -4,10 +4,10 @@ const User = require('../Models/dbModel');
 const router = express.Router();
 const { auth, authorize } = require('../middleware/auth'); // Import auth middleware
 
-// Get all jobs with filtering and search - optionally protected
-router.get('/', auth, async (req, res) => {
+// Get all jobs with filtering and search - public endpoint with optional auth
+router.get('/', async (req, res) => {
     try {
-        const { search, location, type, category, page = 1, limit = 10 } = req.query;
+        const { search, location, type, category, page = 1, limit = 100 } = req.query;
         
         let query = { isActive: true };
         
@@ -27,16 +27,40 @@ router.get('/', auth, async (req, res) => {
             .limit(limit * 1)
             .skip((page - 1) * limit);
 
-        // Add application status for authenticated user
-        const jobsWithApplicationStatus = jobs.map(job => {
-            const hasApplied = job.applications.some(
-                app => app.applicantId.toString() === req.user._id.toString()
-            );
-            return {
+        // Check if user is authenticated and add application status
+        let jobsWithApplicationStatus = jobs;
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1];
+        
+        if (token) {
+            try {
+                const jwt = require('jsonwebtoken');
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                
+                jobsWithApplicationStatus = jobs.map(job => {
+                    const hasApplied = job.applications.some(
+                        app => app.applicantId.toString() === decoded.userId.toString()
+                    );
+                    return {
+                        ...job.toObject(),
+                        hasApplied
+                    };
+                });
+            } catch (error) {
+                // If token is invalid, just return jobs without application status
+                console.log('Invalid token, returning jobs without application status');
+                jobsWithApplicationStatus = jobs.map(job => ({
+                    ...job.toObject(),
+                    hasApplied: false
+                }));
+            }
+        } else {
+            // No token provided, return jobs without application status
+            jobsWithApplicationStatus = jobs.map(job => ({
                 ...job.toObject(),
-                hasApplied
-            };
-        });
+                hasApplied: false
+            }));
+        }
             
         const total = await Job.countDocuments(query);
         

@@ -19,7 +19,9 @@ const Jobs = () => {
     const token = localStorage.getItem('token');
     
     if (!userData || !token) {
-      navigate('/login');
+      // Allow browsing jobs without login, but redirect on apply
+      setUser(null);
+      fetchJobs();
       return;
     }
     
@@ -29,20 +31,24 @@ const Jobs = () => {
       fetchJobs();
     } catch (error) {
       console.error('Error parsing user data:', error);
-      navigate('/login');
+      // Still allow browsing jobs
+      setUser(null);
+      fetchJobs();
     }
-  }, [navigate]);
+  }, []);
 
   // Fetch all jobs
   const fetchJobs = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/jobs', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      // Request all jobs without pagination limit
+      const response = await axios.get('http://localhost:5000/api/jobs?limit=1000', { headers });
       
       if (response.data.success) {
         setAllJobs(response.data.data);
@@ -86,8 +92,21 @@ const Jobs = () => {
 
   // Apply to a job
   const handleApplyJob = async (jobId) => {
+    // Check if user is logged in
+    if (!user) {
+      alert('Please log in to apply for jobs.');
+      navigate('/login');
+      return;
+    }
+
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Please log in to apply for jobs.');
+        navigate('/login');
+        return;
+      }
+
       const response = await axios.post(`http://localhost:5000/api/jobs/${jobId}/apply`, {
         coverLetter: 'Applied through job portal'
       }, {
@@ -111,8 +130,13 @@ const Jobs = () => {
         ));
       }
     } catch (error) {
-      if (error.response?.data?.message === 'Already applied to this job') {
+      if (error.response?.status === 401) {
+        alert('Please log in to apply for jobs.');
+        navigate('/login');
+      } else if (error.response?.data?.message === 'Already applied to this job') {
         alert('You have already applied to this job.');
+      } else if (error.response?.data?.message === 'Only job seekers can apply to jobs') {
+        alert('Only job seekers can apply to jobs.');
       } else {
         console.error('Error applying to job:', error);
         alert('Error submitting application. Please try again.');
@@ -131,7 +155,7 @@ const Jobs = () => {
     navigate('/login');
   };
 
-  if (loading || !user) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
         <div className="text-center">
@@ -164,22 +188,33 @@ const Jobs = () => {
             </button>
             
             <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-white font-medium">{user.firstName} {user.lastName}</p>
-                <p className="text-gray-400 text-sm">{user.type}</p>
-              </div>
-              <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
-                <span className="text-gray-900 font-bold">
-                  {user.firstName.charAt(0)}{user.lastName.charAt(0)}
-                </span>
-              </div>
-              <button 
-                onClick={handleLogout}
-                className="text-gray-400 hover:text-white transition-colors"
-                title="Logout"
-              >
-                <i className="fas fa-sign-out-alt text-xl"></i>
-              </button>
+              {user ? (
+                <>
+                  <div className="text-right">
+                    <p className="text-white font-medium">{user.firstName} {user.lastName}</p>
+                    <p className="text-gray-400 text-sm">{user.type}</p>
+                  </div>
+                  <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
+                    <span className="text-gray-900 font-bold">
+                      {user.firstName.charAt(0)}{user.lastName.charAt(0)}
+                    </span>
+                  </div>
+                  <button 
+                    onClick={handleLogout}
+                    className="text-gray-400 hover:text-white transition-colors"
+                    title="Logout"
+                  >
+                    <i className="fas fa-sign-out-alt text-xl"></i>
+                  </button>
+                </>
+              ) : (
+                <button 
+                  onClick={() => navigate('/login')}
+                  className="bg-yellow-400 text-gray-900 px-4 py-2 rounded-lg hover:bg-yellow-500 transition-colors"
+                >
+                  Login
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -368,7 +403,7 @@ const Jobs = () => {
                   </div>
 
                   <div className="ml-6 flex flex-col items-end space-y-2">
-                    {user.type === 'Seeker' && (
+                    {user && user.type === 'Seeker' && (
                       <button
                         onClick={() => handleApplyJob(job._id)}
                         disabled={job.hasApplied}
@@ -380,6 +415,15 @@ const Jobs = () => {
                       >
                         <i className={`${job.hasApplied ? 'fas fa-check' : 'fas fa-paper-plane'} mr-2`}></i>
                         {job.hasApplied ? 'Applied' : 'Apply Now'}
+                      </button>
+                    )}
+                    {!user && (
+                      <button
+                        onClick={() => handleApplyJob(job._id)}
+                        className="bg-yellow-400 text-gray-900 px-6 py-2 rounded-lg hover:bg-yellow-500 font-medium transition-colors"
+                      >
+                        <i className="fas fa-paper-plane mr-2"></i>
+                        Apply Now
                       </button>
                     )}
                     <button className="text-gray-400 hover:text-yellow-400 transition-colors">
@@ -401,12 +445,12 @@ const Jobs = () => {
           )}
         </div>
 
-        {/* Load More Button (for pagination) */}
-        {filteredJobs.length > 0 && filteredJobs.length < allJobs.length && (
+        {/* Pagination info */}
+        {filteredJobs.length > 0 && (
           <div className="text-center mt-8">
-            <button className="bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors">
-              Load More Jobs
-            </button>
+            <p className="text-gray-400">
+              Showing all {filteredJobs.length} jobs
+            </p>
           </div>
         )}
       </main>
