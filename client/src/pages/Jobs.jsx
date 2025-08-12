@@ -89,7 +89,6 @@ const Jobs = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(`http://localhost:5000/api/jobs/${jobId}/apply`, {
-        applicantId: user._id,
         coverLetter: 'Applied through job portal'
       }, {
         headers: {

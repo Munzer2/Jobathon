@@ -2,11 +2,12 @@ const express = require('express');
 const Job = require('../Models/jobModel'); // Fixed: Jobs -> Job
 const User = require('../Models/dbModel'); 
 const router = express.Router();
+const { auth, authorize } = require('../middleware/auth'); // Import auth middleware
 
-// Get all jobs with filtering and search
-router.get('/', async (req, res) => {
+// Get all jobs with filtering and search - optionally protected
+router.get('/', auth, async (req, res) => {
     try {
-        const { search, location, type, category, page = 1, limit } = req.query;
+        const { search, location, type, category, page = 1, limit = 10 } = req.query;
         
         let query = { isActive: true };
         
@@ -20,35 +21,34 @@ router.get('/', async (req, res) => {
         if (type) query.type = type;
         if (category) query.category = category;
         
-        let jobsQuery = Job.find(query)
+        const jobs = await Job.find(query)
             .populate('employerId', 'firstName lastName company')
-            .sort({ postedAt: -1 });
+            .sort({ postedAt: -1 })
+            .limit(limit * 1)
+            .skip((page - 1) * limit);
+
+        // Add application status for authenticated user
+        const jobsWithApplicationStatus = jobs.map(job => {
+            const hasApplied = job.applications.some(
+                app => app.applicantId.toString() === req.user._id.toString()
+            );
+            return {
+                ...job.toObject(),
+                hasApplied
+            };
+        });
             
-        // Only apply pagination if limit is specified
-        if (limit) {
-            jobsQuery = jobsQuery
-                .limit(limit * 1)
-                .skip((page - 1) * limit);
-        }
-        
-        const jobs = await jobsQuery;
         const total = await Job.countDocuments(query);
         
-        // Return pagination info only if limit was specified
-        const response = {
+        res.json({
             success: true,
-            data: jobs
-        };
-        
-        if (limit) {
-            response.pagination = {
+            data: jobsWithApplicationStatus,
+            pagination: {
                 current: page,
                 total: Math.ceil(total / limit),
                 hasNext: page < Math.ceil(total / limit)
-            };
-        }
-        
-        res.json(response);
+            }
+        });
     } catch (error) {
         console.error('Error fetching jobs:', error);
         res.status(500).json({ success: false, message: 'Server error' });
@@ -80,13 +80,14 @@ router.get('/:id', async(req,res) => {
     }
 }); 
 
-/// Create a new job
-router.post('/create', async (req, res) => {
+/// Create a new job - protected by auth middleware
+/// Only employers can create jobs
+router.post('/create', auth, authorize('Employer'), async (req, res) => {
     try{
         const { title, company, description, requirements, location, type, salary,
             experience, category, skills, benefits, deadline } = req.body;
             
-        const { employerId } = req.body; 
+        const employerId = req.user._id; // Get from authenticated user
 
         const newJob = new Job({
             title, company, description, requirements, location, type, salary,
@@ -112,11 +113,20 @@ router.post('/create', async (req, res) => {
     }
 }); 
 
-
-router.post('/:id/apply', async(req, res) => { 
+/// Apply to a job - protected by auth middleware
+router.post('/:id/apply', auth, async(req, res) => { 
     try {
-        const { applicantId, coverLetter } = req.body; 
+        const { coverLetter } = req.body; 
+        const applicantId = req.user._id; // Get from authenticated user
         const JobId = req.params.id; 
+
+        // Check if user is a seeker
+        if (req.user.type !== 'Seeker') {
+            return res.status(403).json({
+                success: false,
+                message: 'Only job seekers can apply to jobs'
+            });
+        }
 
         const job = await Job.findById(JobId); 
         if(!job) {
@@ -127,9 +137,8 @@ router.post('/:id/apply', async(req, res) => {
         }
 
         const existingApp = job.applications.find(
-            app => app.applicantId.toString() == applicantId 
+            app => app.applicantId.toString() === applicantId.toString() 
         );
-
 
         if(existingApp) { 
             return res.status(400).json({
@@ -138,17 +147,23 @@ router.post('/:id/apply', async(req, res) => {
         }
 
         /// add the application
-
         job.applications.push({
             applicantId, 
-            coverLetter, 
+            coverLetter: coverLetter || 'Applied through job portal', 
             appliedAt : new Date() 
         }); 
 
         await job.save();
 
         res.json({
-            success: true, message: 'Application submitted successfully'
+            success: true, 
+            message: 'Application submitted successfully',
+            application: {
+                jobId: JobId,
+                jobTitle: job.title,
+                company: job.company,
+                appliedAt: new Date()
+            }
         }); 
     }
     catch(error) { 
