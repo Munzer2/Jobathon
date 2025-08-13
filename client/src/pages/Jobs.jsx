@@ -186,6 +186,15 @@ const Jobs = () => {
               <i className="fas fa-tachometer-alt mr-2"></i>
               Dashboard
             </button>
+
+            {/* {Adding a new navigation  item for my applications} */}
+            { user && user.type === 'Seeker' && (
+              <button
+                onClick={() => navigate('/my-applications')}
+                className="text-gray-400 hover:text-white transition-colors flex items-center">
+              <i className="fas fa-clipboard mr-2"></i> My Applications 
+            </button>
+            )}
             
             <div className="flex items-center space-x-4">
               {user ? (

@@ -6,6 +6,7 @@ import LoginPage from './pages/Login';
 import SignupPage from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Jobs from './pages/Jobs';
+import MyApplications from './pages/MyApplications';
 
 // Components
 
@@ -20,6 +21,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/jobs" element={<Jobs />} />
           <Route path="/profile/:userId" element={<Dashboard />} />
+          <Route path="/my-applications" element={<MyApplications />} />
         </Routes>
       </div>
     </Router>

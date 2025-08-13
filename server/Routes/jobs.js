@@ -79,30 +79,64 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Get single job by ID
-router.get('/:id', async(req,res) => {
-    try { 
-        const job = await Job.findById(req.params.id) // Fixed: Jobs -> Job
-            .populate('employerId', 'firstName lastName email phone company')
-            .populate('applications.applicantId', 'firstName lastName email');
+/// Get applications for the authenticated user.
+router.get('/applications', auth, async(req, res)=> {
+    try {
+        const userId = req.user._id; // Get from authenticated user
+        const jobsWithApplications = await Job.find({
+            'applications.applicantId': userId, isActive: true
+        }).populate('employerId', 'firstName lastName company')
+        .sort({'applications.appliedAt' : - 1 });
 
-        if(!job) {
-            return res.status(404).json({ success: false, message: 'Job not found' });
-        }
+        const userApps = [];
+        jobsWithApplications.forEach(job => {
+            const application = job.applications.find(app => app.applicantId.toString() === userId.toString());
+            if(application) {
+                userApps.push({
+                    _id: application._id,
+                    jobId: job._id,
+                    jobTitle: job.title,
+                    company: job.company,
+                    location: job.location,
+                    type: job.type,
+                    salary: job.salary,
+                    appliedAt: application.appliedAt,
+                    status: application.status || 'Applied',
+                    coverLetter: application.coverLetter,
+                    employer: job.employerId
+                });
+            }
+        });
 
         res.json({
             success: true,
-            data: job
+            applications: userApps,
+            total: userApps.length
         });
-    } 
+    }
     catch(error) {
-        console.error( 'Error fetching job: ' , error); 
-        res.status(500).json({
-            success: false,
-            message: 'Server error' 
-        }); 
+        console.error('Error fetching applications:', error);
+        res.status(500).json({ success: false, message: 'Error fetching the applications'});
     }
 }); 
+
+
+router.get('/employer/:employerId', async(req,res) => {
+    try {
+        const jobs = await Job.find({ employerId : req.params.employerId })
+            .populate('applications.applicantId', 'firstName lastName email')
+            .sort({ postedAt: -1}); /// sort by most recent first
+
+        res.json({
+            success: true, 
+            data: jobs
+        });
+    }
+    catch(error) {
+        console.error('Error fetching jobs for employer:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
 
 /// Create a new job - protected by auth middleware
 /// Only employers can create jobs
@@ -136,6 +170,72 @@ router.post('/create', auth, authorize('Employer'), async (req, res) => {
         });
     }
 }); 
+
+router.get('/stats', async(req,res)=> {
+    try {
+
+        const totalJobs = await Job.countDocuments({ isActive: true }); /// Count total active jobs
+
+        const cat = await Job.aggregate([
+            { $match : { isActive : true }}, /// filter actiive jobs
+            { $group : { _id: '$category', count: { $sum: 1 } } }, // group by category
+            { $sort: { count: -1 } } // sort by count descending
+        ]);  
+
+        const totalApplications = await Job.aggregate([
+            { $match : { isActive : true }},
+            { $project: { applicationCount : { $size: '$applications'}}}, /// get application count. WHat project does is it creates a new field applicationCount which is the size of the applications array
+            { $group : { _id : null, total: { $sum: 'applicationCount'}}} /// total applications
+        ]); 
+
+        const types = await Job.aggregate([
+            { $match : { isActive : true }},
+            { $group: {_id: '$type', count : { $sum:1 }}},
+            { $sort: { count: -1 } }
+        ]); 
+
+        res.json({
+            success: true,
+            data: {
+                totalJobs,
+                totalApplications: totalApplications[0]?.total || 0, 
+                cat,
+                types
+            }
+        }); 
+    }
+    catch(error) {
+        console.error('Error fetching job stats:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+}); 
+
+
+// Get single job by ID
+router.get('/:id', async(req,res) => {
+    try { 
+        const job = await Job.findById(req.params.id) // Fixed: Jobs -> Job
+            .populate('employerId', 'firstName lastName email phone company')
+            .populate('applications.applicantId', 'firstName lastName email');
+
+        if(!job) {
+            return res.status(404).json({ success: false, message: 'Job not found' });
+        }
+
+        res.json({
+            success: true,
+            data: job
+        });
+    } 
+    catch(error) {
+        console.error( 'Error fetching job: ' , error); 
+        res.status(500).json({
+            success: false,
+            message: 'Server error' 
+        }); 
+    }
+}); 
+
 
 /// Apply to a job - protected by auth middleware
 router.post('/:id/apply', auth, async(req, res) => { 
@@ -195,65 +295,6 @@ router.post('/:id/apply', auth, async(req, res) => {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
-
-
-router.get('/employer/:employerId', async(req,res) => {
-    try {
-        const jobs = await Job.find({ employerId : req.params.employerId })
-            .populate('applications.applicantId', 'firstName lastName email')
-            .sort({ postedAt: -1}); /// sort by most recent first
-
-        res.json({
-            success: true, 
-            data: jobs
-        });
-    }
-    catch(error) {
-        console.error('Error fetching jobs for employer:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
-    }
-});
-
-
-
-router.get('/stats', async(req,res)=> {
-    try {
-
-        const totalJobs = await Job.countDocuments({ isActive: true }); /// Count total active jobs
-
-        const cat = await Job.aggregate([
-            { $match : { isActive : true }}, /// filter actiive jobs
-            { $group : { _id: '$category', count: { $sum: 1 } } }, // group by category
-            { $sort: { count: -1 } } // sort by count descending
-        ]);  
-
-        const totalApplications = await Job.aggregate([
-            { $match : { isActive : true }},
-            { $project: { applicationCount : { $size: '$applications'}}}, /// get application count. WHat project does is it creates a new field applicationCount which is the size of the applications array
-            { $group : { _id : null, total: { $sum: 'applicationCount'}}} /// total applications
-        ]); 
-
-        const types = await Job.aggregate([
-            { $match : { isActive : true }},
-            { $group: {_id: '$type', count : { $sum:1 }}},
-            { $sort: { count: -1 } }
-        ]); 
-
-        res.json({
-            success: true,
-            data: {
-                totalJobs,
-                totalApplications: totalApplications[0]?.total || 0, 
-                cat,
-                types
-            }
-        }); 
-    }
-    catch(error) {
-        console.error('Error fetching job stats:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
-    }
-}); 
 
 
 module.exports = router;
