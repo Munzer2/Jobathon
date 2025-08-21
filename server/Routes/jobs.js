@@ -211,6 +211,50 @@ router.get('/stats', async(req,res)=> {
 }); 
 
 
+router.delete('/:jobId/withdraw', auth, async(req,res) => {
+    try {
+        const userId = req.user._id;
+        const jobId = req.params.jobId; 
+
+        ///find the job
+        const job = await Job.findById(jobId);
+        if(!job) { 
+            return res.status(404).json({
+                success:false, 
+                message: 'Job was not found'
+            });
+        }
+
+        const appIndex = job.applications.findIndex(
+            app => app.applicantId.toString() == userId.toString() 
+        ); 
+
+        if(appIndex === -1) {
+            return res.status(404).json({
+                success:false,
+                message:'Application not found' 
+            }); 
+        }
+
+        const application = job.applications[appIndex]; 
+        if(application.status === 'Accepted') {
+            return res.status(400).json({ 
+                success: false, message: 'Cannot withdraw from an accepted application'
+            });
+        }
+
+        job.applications.splice(appIndex, 1); /// the 1 is the number of elements to remove
+        await job.save(); 
+        res.json({
+            success:true, message: 'Application withdrawn successfully'
+        });
+    }
+    catch(error) {
+        console.error('Error withdrawing application:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+})
+
 // Get single job by ID
 router.get('/:id', async(req,res) => {
     try { 

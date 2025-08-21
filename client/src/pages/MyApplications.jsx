@@ -62,6 +62,54 @@ const MyApplications = () => {
     }
   };
 
+  const handleWithdrawApp = async (jobId, jobTitle) => {
+    const confirmed = window.confirm(`Are you sure you want to remove this application for ${jobTitle}?`);
+
+    if(!confirmed) return; 
+    
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.delete(
+        `http://localhost:5000/api/jobs/${jobId}/withdraw`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }, 
+        }
+      ); 
+
+      //// This will remove the application from the list without refetching
+      if(res.data.success) {
+        alert("Application withdrawn successfully!");
+        setApplications(prev => 
+          prev.filter(app => app.jobId !== jobId)
+        ); 
+      }
+    }
+    catch(error) { 
+      console.error("Error withdrawing application:", error); 
+      if(error.response?.status === 401) {
+        alert("Session expired. Please log in again"); 
+      }
+      else if(error.response?.status === 404) {
+        alert("Application not found or already withdrawn."); 
+        fetchApplications();
+      }
+      else if(error.response?.status === 400 ) {
+        alert(error.response.data.message);
+      }
+      else {
+        alert("Failed to withdraw application.")
+      }
+    }
+
+  };
+
+  const checkWithdrawApp = (status) => { 
+    const nonWithdrawable = ['Accepted', 'Hired' , 'Rejected'];
+    return  !nonWithdrawable.includes(status); 
+  }; 
+
   const handleLogout = () => {
     localStorage.removeItem("token"); // Remove token from localStorage
     localStorage.removeItem("user"); // Remove user data from localStorage
@@ -309,13 +357,18 @@ const MyApplications = () => {
                         <i className="fas fa-envelope mr-1"></i>
                         Contact
                       </button>
-                      <button 
-                        className="text-red-400 hover:text-red-300 transition-colors flex items-center"
-                        title="Withdraw Application"
-                      >
-                        <i className="fas fa-times mr-1"></i>
-                        Withdraw
-                      </button>
+                  {checkWithdrawApp(application.status) ? (
+                    <button onClick = {() => handleWithdrawApp(application.jobId, application.jobTitle)}
+                    className = "text-red-400 hover:text-red-300 transition-colors flex items-center px-3 py-2 rounded-lg hover:bg-gray-600"
+                    title = "Withdraw Application">
+                      <i className = "fas fa-times mr-2"></i>
+                      Withdraw</button>
+                  ) : (
+                    <div className = "text-gray-500 flex items-center px-3 py-2" title = "Can't withdraw this application">
+                      <i className = "fas fa-lock mr-2"></i>
+                      <span className = "text-xs">Cannot withdraw</span>
+                    </div>
+                  )}
                     </div>
                   </div>
                 </div>
