@@ -3,20 +3,93 @@ const mongoose = require('mongoose');
 
 const cors = require('cors');
 const dotenv = require('dotenv');
-
-
 dotenv.config();
 
-const app = express(); 
+///Imports for socketIO
+const Message = require('./Models/messageModel');
+const User = require('./Models/dbModel');
+const jwt = require('jsonwebtoken');
+
+const app = express(); /// This is the Express application instance
+
+const { Server } = require('socket.io'); /// server is for real-time communication
+const http = require('http');
+const server = http.createServer(app); /// HTTP server for both Express and Socket.IO
+
+/// Handles CORS for websocket connections ( real time messaging )
+/// HTTP and Websocket connections are different protocols with different CORS needs
+const io = new Server(server, { 
+    cors: {
+        origin: process.env.CLIENT_URL || 'http://localhost:3000',
+        methods: ['GET', 'POST'], 
+    }
+}); /// Configure CORS to allow requests from the client URL
 
 
+/// Middleware to authenticate Socket.IO connections using JWT
+io.use((socket,next)=> {
+    const token = socket.handshake.auth.token;
+    try { 
+        const decoded = jwt.verify(token, process.env.JWT_SECRET); 
+        socket.userId = decoded._id; 
+        next(); 
+    }
+    catch(error) {
+        next(new Error('Authentication error')); 
+    }
+}); 
+
+io.on('connection', (socket) => { 
+    socket.on('join_conversation', (conversationId) => { 
+        socket.join(conversationId);
+    });  
+    socket.on('send_message', async(data) => {
+        try { 
+
+            ///validate the data first
+            if(!data.receiver || !data.content || !data.content.trim()) { 
+                return socket.emit('message_error', { message: 'Invalid message data' });
+            }
+
+            if(socket.userId.toString() === data.receiver.toString()) { 
+                return socket.emit('message_error', { message: 'Cannot send message to yourself' });
+            }
+
+            const ids = [socket.userId, data.receiver.toString()].sort();
+            const conversationId = `${ids[0]}-${ids[1]}`;
+            const mssg = await Message.create({
+                sender: socket.userId,
+                receiver: data.receiver,
+                participants: [socket.userId, data.receiver],
+                content: data.content, 
+                conversationId: conversationId
+            }); 
+
+            await mssg.populate('sender', 'firstName lastName type'); 
+            io.to(conversationId).emit('receive_message', mssg); 
+        }
+        catch(error) { 
+            console.error('Error saving or emitting message:', error);
+            socket.emit('message_error', { message: 'Message could not be sent' });
+        }
+    }); 
+
+    socket.on('disconnect', () => { 
+        console.log(`User disconnected: ${socket.userId}`);
+    });
+}); 
+
+
+
+
+/// This code below allows cross-origin requests from the specified client URL. For regular HTTP requests
+/// REST API routes will use this CORS configuration
 app.use(cors(
     {
         origin: process.env.CLIENT_URL || 'http://localhost:3000',
         credentials : true
     }
 )); 
-/// the above code allows cross-origin requests from the specified client URL
 
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Middleware to parse URL-encoded bodies
@@ -73,9 +146,11 @@ app.get('/api/test' , async (req, res) => {
 
 const authRoutes = require('./Routes/auth');
 const jobRoutes = require('./Routes/jobs');
+const messageRoutes = require('./Routes/messages'); 
 
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobRoutes); 
+app.use('/api/messages', messageRoutes); 
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -99,11 +174,19 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+// app.listen(PORT, () => {
+//     console.log(`Server is running on port http://localhost:${PORT}`);
+//     console.log(`Health check endpoint: http://localhost:${PORT}/api/health`);
+//     console.log(`Test database: http://localhost:${PORT}/api/test`);
+//     console.log(`Environment: ${process.env.NODE_ENV}`);
+// }); 
+
+server.listen(PORT, () => { 
     console.log(`Server is running on port http://localhost:${PORT}`);
     console.log(`Health check endpoint: http://localhost:${PORT}/api/health`);
     console.log(`Test database: http://localhost:${PORT}/api/test`);
     console.log(`Environment: ${process.env.NODE_ENV}`);
+    console.log(`Socket.IO server ready for real-time messaging`);
 }); 
 
 
