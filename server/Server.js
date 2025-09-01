@@ -15,6 +15,7 @@ const app = express(); /// This is the Express application instance
 const { Server } = require('socket.io'); /// server is for real-time communication
 const http = require('http');
 const server = http.createServer(app); /// HTTP server for both Express and Socket.IO
+/// server is a raw Node.js HTTP server
 
 /// Handles CORS for websocket connections ( real time messaging )
 /// HTTP and Websocket connections are different protocols with different CORS needs
