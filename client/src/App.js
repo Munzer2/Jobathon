@@ -7,6 +7,7 @@ import SignupPage from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Jobs from './pages/Jobs';
 import MyApplications from './pages/MyApplications';
+import Messages from './pages/Messages';
 
 // Components
 
@@ -22,6 +23,7 @@ function App() {
           <Route path="/jobs" element={<Jobs />} />
           <Route path="/profile/:userId" element={<Dashboard />} />
           <Route path="/my-applications" element={<MyApplications />} />
+          <Route path="/messages" element={<Messages />}></Route>
         </Routes>
       </div>
     </Router>

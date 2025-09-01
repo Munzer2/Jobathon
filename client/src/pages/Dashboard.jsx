@@ -279,7 +279,9 @@ const Dashboard = () => {
               <a href="#" className="text-gray-300 hover:text-yellow-400 transition-colors">
                 Profile
               </a>
-              <a href="#" className="text-gray-300 hover:text-yellow-400 transition-colors">
+              <a href="#" 
+              onClick={(e) => {e.preventDefault(); navigate('/messages');}}
+              className="text-gray-300 hover:text-yellow-400 transition-colors">
                 Messages
               </a>
             </nav>
