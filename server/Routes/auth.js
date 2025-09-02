@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../Models/dbModel'); 
+const { auth } = require('../middleware/auth');
 const router = express.Router();
 
 
@@ -85,6 +86,43 @@ router.get('/profile/:userId', async (req, res) => {
         }
         res.json({ success: true, user });
     } catch(error) {
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+}); 
+
+// Test route to verify auth routes are working
+router.get('/test-users', auth, async (req, res) => {
+    try {
+        console.log('TEST: Auth routes working, user:', req.user?.firstName);
+        res.json({ 
+            success: true, 
+            message: 'Auth routes working',
+            userCount: await User.countDocuments()
+        });
+    } catch(error) {
+        console.error('Test route error:', error);
+        res.status(500).json({ success: false, message: 'Test route error' });
+    }
+});
+
+// Get all users for messaging (excluding current user)
+router.get('/users', auth, async (req, res) => {
+    try {
+        // console.log('GET /users endpoint called');
+        // console.log('User making request:', req.user?.firstName, req.user?.lastName);
+        
+        const users = await User.find({ _id: { $ne: req.user._id } })
+            .select('firstName lastName type email')
+            .sort({ firstName: 1 });
+        
+        // console.log('Found users:', users.length);
+        
+        res.json({ 
+            success: true, 
+            users 
+        });
+    } catch(error) {
+        console.error('Error fetching users:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 }); 
