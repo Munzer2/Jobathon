@@ -1,0 +1,407 @@
+[
+  {
+    "id": "68923a15fcf857ce7c5f3ce5",
+    "title": "Senior Frontend Developer",
+    "company": "TechCorp Solutions",
+    "location": "San Francisco, CA",
+    "type": "Full-time",
+    "experience": "Senior-level",
+    "category": "Technology"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3ce6",
+    "title": "Backend Engineer - Node.js",
+    "company": "DataFlow Inc",
+    "location": "Austin, TX",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Technology"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3ce7",
+    "title": "Full Stack Developer",
+    "company": "StartupXYZ",
+    "location": "Remote",
+    "type": "Remote",
+    "experience": "Mid-level",
+    "category": "Technology"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3ce8",
+    "title": "DevOps Engineer",
+    "company": "CloudFirst Technologies",
+    "location": "Seattle, WA",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Technology"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3ce9",
+    "title": "Data Scientist",
+    "company": "AI Innovations Lab",
+    "location": "Boston, MA",
+    "type": "Full-time",
+    "experience": "Senior-level",
+    "category": "Technology"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3cea",
+    "title": "Mobile App Developer - iOS",
+    "company": "MobileFirst Studios",
+    "location": "Los Angeles, CA",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Technology"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3ceb",
+    "title": "Cybersecurity Analyst",
+    "company": "SecureNet Solutions",
+    "location": "Washington, DC",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Technology"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3cec",
+    "title": "Junior Software Developer",
+    "company": "CodeCraft Academy",
+    "location": "Chicago, IL",
+    "type": "Full-time",
+    "experience": "Entry-level",
+    "category": "Technology"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3ced",
+    "title": "UI/UX Designer",
+    "company": "DesignHub Creative",
+    "location": "Portland, OR",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Design"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3cee",
+    "title": "Product Manager - Tech",
+    "company": "InnovateTech Corp",
+    "location": "New York, NY",
+    "type": "Full-time",
+    "experience": "Senior-level",
+    "category": "Product"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3cef",
+    "title": "Digital Marketing Manager",
+    "company": "GrowthHackers Inc",
+    "location": "Miami, FL",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Marketing"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3cf0",
+    "title": "Content Marketing Specialist",
+    "company": "ContentKings Media",
+    "location": "Denver, CO",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Marketing"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3cf1",
+    "title": "Social Media Manager",
+    "company": "SocialBuzz Agency",
+    "location": "Nashville, TN",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Marketing"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3cf2",
+    "title": "Marketing Coordinator",
+    "company": "BrandBuilders LLC",
+    "location": "Phoenix, AZ",
+    "type": "Full-time",
+    "experience": "Entry-level",
+    "category": "Marketing"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3cf3",
+    "title": "Email Marketing Specialist",
+    "company": "EmailPro Solutions",
+    "location": "Remote",
+    "type": "Remote",
+    "experience": "Mid-level",
+    "category": "Marketing"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3cf4",
+    "title": "Sales Development Representative",
+    "company": "SalesForce Pro",
+    "location": "Atlanta, GA",
+    "type": "Full-time",
+    "experience": "Entry-level",
+    "category": "Sales"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3cf5",
+    "title": "Account Executive",
+    "company": "Enterprise Solutions Group",
+    "location": "Dallas, TX",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Sales"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3cf6",
+    "title": "Inside Sales Representative",
+    "company": "TechSales Solutions",
+    "location": "Salt Lake City, UT",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Sales"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3cf7",
+    "title": "Regional Sales Manager",
+    "company": "NationWide Products",
+    "location": "San Diego, CA",
+    "type": "Full-time",
+    "experience": "Senior-level",
+    "category": "Sales"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3cf8",
+    "title": "Financial Analyst",
+    "company": "Capital Investments Corp",
+    "location": "New York, NY",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Finance"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3cf9",
+    "title": "Accounting Manager",
+    "company": "NumbersCorp LLC",
+    "location": "Houston, TX",
+    "type": "Full-time",
+    "experience": "Senior-level",
+    "category": "Finance"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3cfa",
+    "title": "Investment Banking Analyst",
+    "company": "Premier Investment Bank",
+    "location": "New York, NY",
+    "type": "Full-time",
+    "experience": "Entry-level",
+    "category": "Finance"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3cfb",
+    "title": "Tax Specialist",
+    "company": "TaxPro Services",
+    "location": "Las Vegas, NV",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Finance"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3cfc",
+    "title": "Registered Nurse - ICU",
+    "company": "Metropolitan Medical Center",
+    "location": "Minneapolis, MN",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Healthcare"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3cfd",
+    "title": "Physical Therapist",
+    "company": "Rehabilitation Specialists",
+    "location": "Tampa, FL",
+    "type": "Full-time",
+    "experience": "Entry-level",
+    "category": "Healthcare"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3cfe",
+    "title": "Medical Assistant",
+    "company": "Family Practice Associates",
+    "location": "Raleigh, NC",
+    "type": "Full-time",
+    "experience": "Entry-level",
+    "category": "Healthcare"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3cff",
+    "title": "Pharmacy Technician",
+    "company": "Regional Pharmacy Network",
+    "location": "Oklahoma City, OK",
+    "type": "Full-time",
+    "experience": "Entry-level",
+    "category": "Healthcare"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3d00",
+    "title": "Elementary School Teacher",
+    "company": "Sunshine Elementary School",
+    "location": "Portland, OR",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Education"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3d01",
+    "title": "High School Math Teacher",
+    "company": "Lincoln High School",
+    "location": "Columbus, OH",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Education"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3d02",
+    "title": "Instructional Designer",
+    "company": "EduTech Solutions",
+    "location": "Remote",
+    "type": "Remote",
+    "experience": "Mid-level",
+    "category": "Education"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3d03",
+    "title": "Corporate Trainer",
+    "company": "SkillBoost Training",
+    "location": "Chicago, IL",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Education"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3d04",
+    "title": "Customer Success Manager",
+    "company": "ClientFirst Software",
+    "location": "San Antonio, TX",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Customer Service"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3d05",
+    "title": "Technical Support Specialist",
+    "company": "HelpDesk Pro",
+    "location": "Remote",
+    "type": "Remote",
+    "experience": "Entry-level",
+    "category": "Customer Service"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3d06",
+    "title": "Call Center Representative",
+    "company": "Contact Solutions Inc",
+    "location": "Phoenix, AZ",
+    "type": "Full-time",
+    "experience": "Entry-level",
+    "category": "Customer Service"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3d07",
+    "title": "Operations Manager",
+    "company": "Efficient Operations Group",
+    "location": "Detroit, MI",
+    "type": "Full-time",
+    "experience": "Senior-level",
+    "category": "Operations"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3d08",
+    "title": "Supply Chain Coordinator",
+    "company": "LogiFlow Systems",
+    "location": "Cleveland, OH",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Operations"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3d09",
+    "title": "Quality Assurance Specialist",
+    "company": "Quality First Manufacturing",
+    "location": "Milwaukee, WI",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Operations"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3d0a",
+    "title": "HR Generalist",
+    "company": "People Solutions HR",
+    "location": "Richmond, VA",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Human Resources"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3d0b",
+    "title": "Talent Acquisition Specialist",
+    "company": "TalentFinder Agency",
+    "location": "Austin, TX",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Human Resources"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3d0c",
+    "title": "Training and Development Coordinator",
+    "company": "Learning Solutions Corp",
+    "location": "Kansas City, MO",
+    "type": "Full-time",
+    "experience": "Mid-level",
+    "category": "Human Resources"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3d0d",
+    "title": "Software Engineering Intern",
+    "company": "TechStartup Innovations",
+    "location": "Palo Alto, CA",
+    "type": "Internship",
+    "experience": "Entry-level",
+    "category": "Technology"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3d0e",
+    "title": "Marketing Intern",
+    "company": "Creative Marketing Agency",
+    "location": "Los Angeles, CA",
+    "type": "Internship",
+    "experience": "Entry-level",
+    "category": "Marketing"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3d0f",
+    "title": "Finance Intern",
+    "company": "Investment Partners LLC",
+    "location": "New York, NY",
+    "type": "Internship",
+    "experience": "Entry-level",
+    "category": "Finance"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3d10",
+    "title": "Part-time Graphic Designer",
+    "company": "Creative Studio Arts",
+    "location": "Seattle, WA",
+    "type": "Part-time",
+    "experience": "Mid-level",
+    "category": "Design"
+  },
+  {
+    "id": "68923a15fcf857ce7c5f3d11",
+    "title": "Part-time Data Entry Clerk",
+    "company": "Administrative Services Plus",
+    "location": "Orlando, FL",
+    "type": "Part-time",
+    "experience": "Entry-level",
+    "category": "Administrative"
+  }
+]

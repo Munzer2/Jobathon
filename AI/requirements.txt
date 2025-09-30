@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+pydantic
+python-dotenv
+pymongo
+sentence-transformers
+faiss-cpu
+openai
+requests
